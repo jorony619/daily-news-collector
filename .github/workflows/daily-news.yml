@@ -39,14 +39,14 @@ jobs:
           git add daily-reports/*.md || true
           git commit -m "Update report" || echo "Nothing to commit"
           git push || echo "Push failed"
-      - name: 发送日报邮件
-        uses: dawidd6/action-send-mail@v3
-        with:
-          server_address: smtp.office365.com
-          server_port: 587
-          username: ${{ secrets.EMAIL_USERNAME }}
-          password: ${{ secrets.EMAIL_PASSWORD }}
-          subject: "Daily Report - $(date +%Y-%m-%d)"
-          to: qian.chen@twedutech.com
-          from: GitHub Actions
-          body: "Daily report generated successfully."
+- name: 发送日报邮件
+  uses: dawidd6/action-send-mail@v3
+  with:
+    server_address: smtp.office365.com  # 修改为Outlook SMTP
+    server_port: 587
+    username: ${{ secrets.EMAIL_USERNAME }}
+    password: ${{ secrets.EMAIL_PASSWORD }}
+    subject: "📊 出版印刷行业日报 - $(date +%Y-%m-%d)"
+    to: qian.chen@twedutech.com
+    from: GitHub Actions
+    body: "Daily report generated successfully."
