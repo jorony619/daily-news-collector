@@ -1,0 +1,64 @@
+{
+  "sources": [
+    {
+      "name": "Publishing Perspectives",
+      "url": "https://publishingperspectives.com/feed/",
+      "category": "出版",
+      "type": "rss"
+    },
+    {
+      "name": "Book Riot",
+      "url": "https://bookriot.com/feed/",
+      "category": "出版",
+      "type": "rss"
+    },
+    {
+      "name": "Publishers Weekly - Digital",
+      "url": "https://publishersweekly.com/pw/feeds/digital.xml",
+      "category": "出版",
+      "type": "rss"
+    },
+    {
+      "name": "PR Newswire - Publishing",
+      "url": "http://rss.prnewswire.com/rss/publishing.xml",
+      "category": "出版",
+      "type": "rss"
+    },
+    {
+      "name": "State of Digital Publishing",
+      "url": "https://stateofdigitalpublishing.com/feed/",
+      "category": "出版",
+      "type": "rss"
+    },
+    {
+      "name": "What They Think",
+      "url": "https://whattheythink.com/feed/",
+      "category": "印刷",
+      "type": "rss"
+    },
+    {
+      "name": "Printing News",
+      "url": "https://printingnews.com/feed/",
+      "category": "印刷",
+      "type": "rss"
+    },
+    {
+      "name": "FuturePrint",
+      "url": "https://futureprint.tech/feed/",
+      "category": "印刷",
+      "type": "rss"
+    },
+    {
+      "name": "Print Media Centr",
+      "url": "https://printmediacentr.com/feed/",
+      "category": "印刷",
+      "type": "rss"
+    },
+    {
+      "name": "Two Sides Blog",
+      "url": "https://twosides.info/feed/",
+      "category": "印刷",
+      "type": "rss"
+    }
+  ]
+}
