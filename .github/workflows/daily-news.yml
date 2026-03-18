@@ -31,7 +31,7 @@ jobs:
           mkdir -p daily-reports
           python daily-news-collector/scripts/collect_feeds.py --config sources.json --output raw_feeds.json || echo "[]" > raw_feeds.json
           python daily-news-collector/scripts/collect_webpages.py --url https://whattheythink.com/news/ --output web_data.json || echo '{"webpages": []}' > web_data.json
-          python generate_report.py || python -c "open('daily-reports/test.md', 'w').write('# Test Report')"
+          generate_report_with_translation.py || python -c "open('daily-reports/test.md', 'w').write('# Test Report')"
       - name: 提交日报
         run: |
           git config --local user.email "action@github.com"
