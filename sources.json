@@ -1,70 +1,34 @@
-name: Daily News Collector
-
-on:
-  schedule:
-    - cron: '0 1 * * *'  # UTC时间1点=北京时间9点
-  workflow_dispatch:  # 支持手动触发
-
-jobs:
-  collect:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
-      
-      - name: Install dependencies
-        run: |
-          pip install requests feedparser beautifulsoup4 lxml
-      
-      - name: Collect RSS feeds
-        run: |
-          python daily-news-collector/scripts/collect_feeds.py \
-            --config sources.json \
-            --output raw_feeds.json
-      
-      - name: Collect webpages
-        run: |
-          python daily-news-collector/scripts/collect_webpages.py \
-            --url https://whattheythink.com/news/ \
-            --output web_data.json
-      
-      - name: Generate daily report
-        run: |
-          DATE=$(date +%Y-%m-%d)
-          
-          # 提取出版行业前5条
-          echo "# 出版印刷行业动态日报 - ${DATE}" > daily-reports/daily-news-report-${DATE}.md
-          echo "" >> daily-reports/daily-news-report-${DATE}.md
-          echo "**生成时间**: ${DATE}" >> daily-reports/daily-news-report-${DATE}.md
-          echo "" >> daily-reports/daily-news-report-${DATE}.md
-          
-          # 简单格式化输出
-          echo "## 出版行业" >> daily-reports/daily-news-report-${DATE}.md
-          echo "" >> daily-reports/daily-news-report-${DATE}.md
-          
-          python -c "
-import json
-with open('raw_feeds.json', 'r', encoding='utf-8') as f:
-    data = json.load(f)
-
-publishing_articles = [a for a in data['articles'] if a['category'] == '出版'][:5]
-for i, article in enumerate(publishing_articles, 1):
-    with open('daily-reports/daily-news-report-${DATE}.md', 'a', encoding='utf-8') as f:
-        f.write(f'{i}. **{article[\"title\"]}**\n')
-        f.write(f'   - 来源: {article[\"source\"]}\n')
-        f.write(f'   - 链接: {article[\"link\"]}\n')
-        f.write(f'   - 时间: {article[\"published\"]}\n')
-        f.write(f'   - 摘要: {article[\"summary\"][:200]}...\n\n')
-"
-          
-          echo "## 印刷行业" >> daily-reports/daily-news-report-${DATE}.md
-          echo "" >> daily-reports/daily-news-report-${DATE}.md
-          
-          python -c "
-import json
-with open
+{
+  "sources": [
+    {
+      "name": "Publishers Weekly - Digital",
+      "url": "https://www.publishersweekly.com/pw/by-topic/industry-news/index.html",
+      "category": "出版",
+      "type": "web"
+    },
+    {
+      "name": "What They Think",
+      "url": "https://whattheythink.com/news/",
+      "category": "印刷",
+      "type": "web"
+    },
+    {
+      "name": "Printing News",
+      "url": "https://printingnews.com/",
+      "category": "印刷",
+      "type": "web"
+    },
+    {
+      "name": "Publishing Perspectives",
+      "url": "https://publishingperspectives.com/feed/",
+      "category": "出版",
+      "type": "rss"
+    },
+    {
+      "name": "Book Riot",
+      "url": "https://bookriot.com/feed/",
+      "category": "出版",
+      "type": "rss"
+    }
+  ]
+}
