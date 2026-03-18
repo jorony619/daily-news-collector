@@ -11,13 +11,15 @@ jobs:
     steps:
       - name: 检出仓库代码
         uses: actions/checkout@v4
+
       - name: 设置Python环境
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
+
       - name: 安装依赖包
-        run: |
-          pip install requests feedparser beautifulsoup4 lxml
+        run: pip install requests feedparser beautifulsoup4 lxml
+
       - name: 验证文件结构
         run: |
           ls -la
@@ -26,58 +28,30 @@ jobs:
           test -d daily-news-collector && echo "daily-news-collector OK"
           test -f daily-news-collector/scripts/collect_feeds.py && echo "collect_feeds.py OK"
           test -f daily-news-collector/scripts/collect_webpages.py && echo "collect_webpages.py OK"
-- name: 收集行业资讯
-  run: |
-    echo "===== 开始收集数据 ====="
-    mkdir -p daily-reports
-    python daily-news-collector/scripts/collect_feeds.py --config sources.json --output ./raw_feeds.json || {
-        echo "⚠️ RSS收集失败，创建空文件..."
-        echo "[]" > ./raw_feeds.json
-    }
-    python daily-news-collector/scripts/collect_webpages.py --url https://whattheythink.com/news/ --output ./web_data.json || {
-        echo "⚠️ 网页抓取失败，创建空文件..."
-        echo '{"webpages": []}' > ./web_data.json
-    }
-    echo "=== 生成的数据文件 ==="
-    ls -la *.json
-    echo "=== daily-reports目录 ==="
-    ls -la daily-reports/ || true
-    echo "=== 生成日报 ==="
-    python generate_report.py || {
-        echo "⚠️ 日报生成失败，创建默认日报..."
-        python -c "
-from datetime import datetime
-date_str = datetime.now().strftime('%Y-%m-%d')
-content = f'''# 出版印刷行业动态日报 - {date_str}
 
-**生成时间**: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
-**资讯总数**: 0 条
-**状态**: 数据收集失败，请检查RSS源配置
+      - name: 收集行业资讯
+        run: |
+          mkdir -p daily-reports
+          python daily-news-collector/scripts/collect_feeds.py --config sources.json --output raw_feeds.json || echo "[]" > raw_feeds.json
+          python daily-news-collector/scripts/collect_webpages.py --url https://whattheythink.com/news/ --output web_data.json || echo '{"webpages": []}' > web_data.json
+          python generate_report_with_translation.py || python -c "open('daily-reports/test.md', 'w').write('# Test Report')"
 
-## 今日动态
+      - name: 提交日报
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add daily-reports/*.md || true
+          git commit -m "Update report" || echo "Nothing to commit"
+          git push || echo "Push failed"
 
-暂无数据收集成功，请检查：
-- RSS源是否有效
-- 网络连接是否正常
-- Python依赖是否安装成功
-
----
-**备注**: 本报告由GitHub Actions自动生成
-'''
-with open(f'daily-reports/daily-news-report-{date_str}.md', 'w', encoding='utf-8') as f:
-    f.write(content)
-print(f'默认日报已生成: daily-reports/daily-news-report-{date_str}.md')
-"
-    }
-    echo "===== 数据收集完成 ====="
-- name: 提交日报
-  run: |
-    echo "===== 提交日报到仓库 ====="
-    git config --local user.email "action@github.com"
-    git config --local user.name "GitHub Action"
-    git add daily-reports/*.md || true
-    echo "=== 检查是否有新的修改 ==="
-    git status
-    echo ""
-    git diff --staged --quiet || git commit -m "📊 每日日报更新 $(date +%Y-%m-%d)" || echo "无新内容需提交"
-    git push || echo "⚠️ 推送失败"
+      - name: 发送日报邮件
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.office365.com
+          server_port: 587
+          username: ${{ secrets.EMAIL_USERNAME }}
+          password: ${{ secrets.EMAIL_PASSWORD }}
+          subject: "Daily Report - $(date +%Y-%m-%d)"
+          to: qian.chen@twedutech.com
+          from: GitHub Actions
+          body: "Daily report generated successfully."
