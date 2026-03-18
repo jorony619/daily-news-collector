@@ -1,0 +1,36 @@
+name: 每日新闻收集
+
+on:
+  schedule:
+    - cron: '0 1 * * *'  # 北京时间每天9点自动运行
+  workflow_dispatch:      # 支持手动触发
+
+jobs:
+  collect-news:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v3
+      
+      - name: 设置Python环境
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      
+      - name: 安装依赖
+        run: |
+          pip install requests feedparser beautifulsoup4 lxml
+      
+      - name: 运行收集脚本
+        run: |
+          chmod +x run_collector.sh
+          bash run_collector.sh
+      
+      - name: 提交日报
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add daily-reports/*.md
+          git commit -m "每日日报更新 $(date +%Y-%m-%d)" || echo "没有新的日报需要提交"
+          git push
